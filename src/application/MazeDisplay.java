@@ -1,10 +1,5 @@
 package application;
 import javafx.util.Duration;
-import searches.BFS;
-import searches.DFS;
-import searches.Greedy;
-import searches.Magic;
-import searches.RandomWalk;
 
 import java.awt.Point;
 
@@ -30,6 +25,10 @@ import javafx.scene.shape.Rectangle;
 
 public class MazeDisplay extends Application {
 
+	// CLASS INSTANCE VARIABLES:
+	
+	private MazeController control;
+
 	/*
 	 * GUI settings
 	 */
@@ -40,16 +39,12 @@ public class MazeDisplay extends Application {
 	private final int NUM_ROWS = 31; 
 	private final int NUM_COLUMNS = 41;
 
-	private Scene myScene;						// the container for the GUI
-	private boolean paused = false;		
+	private Scene myScene;						// container for the GUI
+	private boolean paused = false;
 	private Button pauseButton;
 
-	private Rectangle[][] mirrorMaze;	// the Rectangle objects that will get updated and drawn.  It is 
-	// called "mirror" maze because there is one entry per square in 
-	// the maze.
+	private Rectangle[][] mirrorMaze;	
 
-	MazeController mc;
-	
 	/*
 	 * Maze color settings
 	 */
@@ -58,25 +53,27 @@ public class MazeDisplay extends Application {
 			Color.rgb(128,128,255),	// path color
 			Color.WHITE,			// empty cell color
 			Color.rgb(200,200,200)	// visited cell color
-	};  		// the color of each of the states  
+	};  		// the color of each of the states
 
+	
 	// Start of JavaFX Application
 	public void start(Stage stage) {
-		mc = new MazeController(NUM_ROWS, NUM_COLUMNS, this); 
 		
 		// Initializing logic state
-		int numRows = NUM_ROWS;
-		int numColumns = NUM_COLUMNS;
-		
+		control = new MazeController(NUM_ROWS, NUM_COLUMNS, this);
+
 		// Initializing the gui
 		myScene = setupScene();
+		
 		stage.setScene(myScene);
 		stage.setTitle("aMAZEing");
 		stage.show();
 
 		// Makes the animation happen.  Will call "step" method repeatedly.
 		KeyFrame frame = new KeyFrame(Duration.millis(MILLISECOND_DELAY), e -> step(MILLISECOND_DELAY));
+		
 		Timeline animation = new Timeline();
+		
 		animation.setCycleCount(Timeline.INDEFINITE);
 		animation.getKeyFrames().add(frame);
 		animation.play();
@@ -109,7 +106,7 @@ public class MazeDisplay extends Application {
 
 		Button newMazeButton = new Button("New Maze");
 		newMazeButton.setOnAction(value ->  {
-			mc.newMaze();
+			control.newMaze();
 		});
 		controls.getChildren().add(newMazeButton);
 
@@ -121,44 +118,46 @@ public class MazeDisplay extends Application {
 
 		Button stepButton = new Button("Step");
 		stepButton.setOnAction(value ->  {
-			mc.doOneStep(MILLISECOND_DELAY);
+			control.doOneStep(MILLISECOND_DELAY);
 		});
 		controls.getChildren().add(stepButton);
 		return controls;
 	}
 
 	private HBox setupSearchButtons(){
+		
 		HBox searches = new HBox();
+		
 		searches.setAlignment(Pos.BASELINE_CENTER);
 		searches.setSpacing(5);
 
 		Button dfsButton = new Button("Depth-First Search");
 		dfsButton.setOnAction(value ->  {
-			mc.startSearch("DFS");
+			control.startSearch("DFS");
 		});
 		searches.getChildren().add(dfsButton);
 
 		Button bfsButton = new Button("Breadth-First Search");
 		bfsButton.setOnAction(value ->  {
-			mc.startSearch("BFS");
+			control.startSearch("BFS");
 		});
 		searches.getChildren().add(bfsButton);
 
 		Button greedyButton = new Button("Greedy");
 		greedyButton.setOnAction(value ->  {
-			mc.startSearch("Greedy");
+			control.startSearch("Greedy");
 		});
 		searches.getChildren().add(greedyButton);
 
 		Button randButton = new Button("Random Walk");
 		randButton.setOnAction(value ->  {
-			mc.startSearch("RandomWalk");
+			control.startSearch("RandomWalk");
 		});
 		searches.getChildren().add(randButton);
 
 		Button magicButton = new Button("Magic!");
 		magicButton.setOnAction(value ->  {
-			mc.startSearch("Magic");
+			control.startSearch("Magic");
 		});
 		searches.getChildren().add(magicButton);
 		return searches;
@@ -173,15 +172,21 @@ public class MazeDisplay extends Application {
 	 * make the mirrorMaze.
 	 */
 	private Group setupMaze(){
+		
 		Group drawing = new Group();
+		
 		mirrorMaze = new Rectangle[NUM_ROWS][NUM_COLUMNS];
+		
 		for(int i = 0; i< NUM_ROWS; i++){
+			
 			for(int j =0; j < NUM_COLUMNS; j++){
+				
 				Rectangle rect = new Rectangle(j*BLOCK_SIZE, i*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
-				rect.setFill(color[mc.getCellState(new Point(i,j))]);
+				
+				rect.setFill(color[control.getCellState(new Point(i,j))]);
 				mirrorMaze[i][j] = rect;
 				drawing.getChildren().add(rect);
-			}	
+			}
 		}
 		return drawing;
 	}
@@ -203,19 +208,20 @@ public class MazeDisplay extends Application {
 	 * Pause the animation (regardless of current state of pause button)
 	 */
 	public void pauseIt(){
+		
 		this.paused = true;
 		pauseButton.setText("Resume");
 	}
 
 	/*
-	 * resets all the rectangle colors according to the 
-	 * current state of that rectangle in the maze.  This 
+	 * resets all the rectangle colors according to the
+	 * current state of that rectangle in the maze.  This
 	 * method assumes the display maze matches the model maze
 	 */
 	public void redraw(){
 		for(int i = 0; i< mirrorMaze.length; i++){
 			for(int j =0; j < mirrorMaze[i].length; j++){
-				mirrorMaze[i][j].setFill(color[mc.getCellState(new Point(i,j))]);
+				mirrorMaze[i][j].setFill(color[control.getCellState(new Point(i,j))]);
 			}
 		}
 	}
@@ -225,7 +231,7 @@ public class MazeDisplay extends Application {
 	 */
 	public void step(double elapsedTime){
 		if(!paused) {
-			mc.doOneStep(elapsedTime);
+			control.doOneStep(elapsedTime);
 		}
 	}
 

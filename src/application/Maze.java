@@ -12,7 +12,9 @@ import java.awt.Point;
  * or path (discovered and actively being explored.)
  * 
  * Maze squares are accessed by their point in (row, column) order
+ * 
  */
+
 public class Maze {
 	// Possible states of squares that make up a maze
 	public static final int WALL = 0;	
@@ -195,5 +197,3 @@ public class Maze {
 		}
 	}
 }
-
-
