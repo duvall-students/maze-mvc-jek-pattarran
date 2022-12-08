@@ -8,10 +8,11 @@ public class MazeController {
     /*
      * Logic of the program
      */
-    // The search algorithms
-    private Search search;		// This string tells which algorithm is currently chosen.  Anything other than
-   
-    // Where to start and stop the search
+	
+    // initialize search instance variable
+    private Search search;		
+    
+    // initialize start and end points
     private Point start;
     private Point end;
 
